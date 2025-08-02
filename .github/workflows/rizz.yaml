@@ -1,0 +1,39 @@
+name: Combine nsr.wasm Parts
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  combine_wasm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Combine nsr.wasm parts
+        run: |
+          cat ./Build/nsr.wasm.part.000 \
+              ./Build/nsr.wasm.part.001 \
+            > ./Build/nsr.wasm
+
+      - name: Commit combined nsr.wasm file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./Build/nsr.wasm
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Combine nsr.wasm parts into single file"
+            git push
+          fi
