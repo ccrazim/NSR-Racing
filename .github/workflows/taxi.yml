@@ -1,0 +1,39 @@
+name: Combine nsr.data Parts
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  combine_data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Combine nsr.data parts
+        run: |
+          cat ./Build/nsr.data.part.000 \
+              ./Build/nsr.data.part.001 \
+            > ./Build/nsr.data
+
+      - name: Commit combined nsr.data file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./Build/nsr.data
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Combine nsr.data parts into single file"
+            git push
+          fi
